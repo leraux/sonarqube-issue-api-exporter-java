@@ -2,3 +2,6 @@
 /.settings
 /*.classpath
 /*.factorypath
+/.project
+/archive
+/target
