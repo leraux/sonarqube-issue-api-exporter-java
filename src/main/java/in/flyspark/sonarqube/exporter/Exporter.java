@@ -1,4 +1,4 @@
-package in.flyspark.sonarqube.exporter.controller;
+package in.flyspark.sonarqube.exporter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
