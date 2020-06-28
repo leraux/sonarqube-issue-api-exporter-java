@@ -1,37 +1,34 @@
 package in.flyspark.sonarqube.exporter;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import in.flyspark.sonarqube.exporter.entity.Issues;
+import in.flyspark.sonarqube.exporter.service.ExcelService;
 import in.flyspark.sonarqube.exporter.service.ReportService;
 
-/*
-  
-  @author FlySpark
-  
-  Run from command line using maven
-  
-  Format:
-  Path_To_Root_Dir>mvn -q clean compile exec:java -Dexec.mainClass="in.flyspark.sonarqube.exporter.controller.Exporter" -Dexec.args="1.Host 2.Token 3.ProjectKey 4.ProjectName(Name of your choice) 5.Version(Ex - v.1.0 , v1.0.0.0 , freetext)"
-  
-  Example:
-  Path_To_Root_Dir>mvn -q clean compile exec:java -Dexec.mainClass="in.flyspark.sonarqube.exporter.controller.Exporter" -Dexec.args="http://localhost:9000/ da5ad9e667faf116e42a8aadfb33d0b64f45bd99 JavaScriptKey JS_Project_Report v1.0.0.0"
- 
-*/
 public class Exporter {
-	private static final Logger log = LogManager.getLogger(Exporter.class);
+	private static final Logger logger = LoggerFactory.getLogger(Exporter.class.getSimpleName());
 
 	public static void main(String[] args) {
 
 		try {
-			if (args.length < 5) {
-				log.info("\nInput Sequence : 1.Host 2.Token 3.ProjectKey 4.ProjectName(Name of your choice) 5.Version(Ex - v.1.0 , v1.0.0.0 , freetext)");
+			if (args.length < 4) {
+				logger.info("\nInput Sequence : Host SonarToken ProjectKey ProjectName");
 				return;
 			}
 
-			ReportService.report(args[0], args[1], args[2], args[3], args[4]);
+			String host = args[0];
+			String loginToken = args[1];
+			String projectKey = args[2];
+			String projectName = args[3];
+			List<Issues> issues = ReportService.report(host, loginToken, projectKey, projectName);
+			String fileName = ExcelService.exportExcel(issues, projectName);
+			logger.debug("Generated File - {}", fileName);
 		} catch (Exception ex) {
-			log.error("Main : ", ex);
+			logger.error("Main : ", ex);
 		}
 
 	}

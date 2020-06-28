@@ -1,61 +1,46 @@
 package in.flyspark.sonarqube.exporter.rest;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class WSHandler {
-	private static final Logger log = LogManager.getLogger(WSHandler.class);
+import in.flyspark.sonarqube.exporter.exception.ServiceUnavailableException;
 
-	private static String response = "";
-	private final static int GET = 1;
-	private final static int POST = 2;
+public class WSHandler {
+	private static final Logger logger = LoggerFactory.getLogger(WSHandler.class.getSimpleName());
 
-	static String makeServiceCall(final String url) {
-		return makeServiceCall(url, GET, null);
-	}
+	private static final String USER_AGENT = "Mozilla/5.0";
 
-	private static String makeServiceCall(String url, final int method, final List<NameValuePair> params) {
+	public static String makeServiceCall(String url) throws ServiceUnavailableException {
 		try {
-			HttpClient httpClient = HttpClientBuilder.create().build();
-			HttpResponse httpResponse = null;
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			con.setRequestMethod("GET");
+			con.setRequestProperty("User-Agent", USER_AGENT);
+			int responseCode = con.getResponseCode();
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String inputLine;
+				StringBuffer response = new StringBuffer();
 
-			if (method == POST) {
-				HttpPost httpPost = new HttpPost(url);
-				if (params != null) {
-					httpPost.setEntity(new UrlEncodedFormEntity(params));
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
 				}
-				httpResponse = httpClient.execute(httpPost);
-			} else if (method == GET) {
-				if (params != null) {
-					String paramString = URLEncodedUtils.format(params, "UTF-8");
-					url += "?" + paramString;
-				}
-				HttpGet httpGet = new HttpGet(url);
-				httpResponse = httpClient.execute(httpGet);
+				in.close();
+				return response.toString();
+			} else {
+				logger.debug("Unable to get response");
+				throw new ServiceUnavailableException("Service Unavailable : " + url);
 			}
-			response = EntityUtils.toString(httpResponse.getEntity());
-		} catch (UnsupportedEncodingException e) {
-			log.error(e);
-		} catch (ClientProtocolException e) {
-			log.error(e);
 		} catch (IOException e) {
-			log.error(e);
+			logger.error("makeServiceCall : ", e);
 		}
-		return response;
+		return "";
 	}
 
 }

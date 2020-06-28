@@ -1,7 +1,6 @@
 package in.flyspark.sonarqube.exporter.service;
 
 import java.awt.Color;
-import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -31,20 +28,22 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import in.flyspark.sonarqube.exporter.entity.Issues;
 import in.flyspark.sonarqube.exporter.util.Constants;
 import in.flyspark.sonarqube.exporter.util.DateTimeUtil;
 import in.flyspark.sonarqube.exporter.util.Utils;
 
-class ExcelService {
-	private static final Logger log = LogManager.getLogger(ExcelService.class);
+public class ExcelService {
+	private static final Logger logger = LoggerFactory.getLogger(ExcelService.class.getSimpleName());
 
-	void exportExcel(List<Issues> issues, String projectName, String version) throws IOException {
+	public static String exportExcel(List<Issues> issues, String projectName) throws IOException {
+		logger.debug("Exporting Excel");
 		Workbook workbook = null;
 		FileOutputStream fileOut = null;
 		File file = null;
-		boolean fileCreated = false;
 		try {
 			if (!issues.isEmpty()) {
 
@@ -103,7 +102,8 @@ class ExcelService {
 				// Severity
 
 				String severityColumns[] = { "Severity", "Count" };
-				Map<String, Long> mapSeverity = issues.stream().filter(issue -> !Utils.isNullEmpty(issue.getLine())).collect(Collectors.groupingBy(Issues::getSeverity, Collectors.counting()));
+				Map<String, Long> mapSeverity = issues.stream().filter(issue -> !Utils.isNullEmpty(issue.getLine()))
+						.collect(Collectors.groupingBy(Issues::getSeverity, Collectors.counting()));
 
 				CellStyle severityCellStyle = workbook.createCellStyle();
 				severityCellStyle.setWrapText(true);
@@ -168,7 +168,8 @@ class ExcelService {
 
 				// Type
 
-				Map<String, Long> mapType = issues.stream().filter(issue -> !Utils.isNullEmpty(issue.getLine())).collect(Collectors.groupingBy(Issues::getType, Collectors.counting()));
+				Map<String, Long> mapType = issues.stream().filter(issue -> !Utils.isNullEmpty(issue.getLine()))
+						.collect(Collectors.groupingBy(Issues::getType, Collectors.counting()));
 				String typeColumns[] = { "Type", "Count" };
 
 				CellStyle typeCellStyle = workbook.createCellStyle();
@@ -235,9 +236,9 @@ class ExcelService {
 
 				CellStyle reportHeaderCellStyle = workbook.createCellStyle();
 				reportHeaderCellStyle.setWrapText(true);
-				setFont(workbook.createFont(), reportHeaderCellStyle, true, 12, IndexedColors.BLACK.getIndex());
+				setFont(workbook.createFont(), reportHeaderCellStyle, true, 12, IndexedColors.WHITE.getIndex());
 				setBorder(reportHeaderCellStyle, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN);
-				setBGColor(workbook, reportHeaderCellStyle, new Color(255, 192, 0), FillPatternType.SOLID_FOREGROUND);
+				setBGColor(workbook, reportHeaderCellStyle, new Color(32, 55, 100), FillPatternType.SOLID_FOREGROUND);
 				reportHeaderCellStyle.setAlignment(HorizontalAlignment.CENTER);
 
 				Row reportHeaderRow = reportSheet.createRow(0);
@@ -281,13 +282,7 @@ class ExcelService {
 
 					Cell severityCell = reportRow.createCell(reportColumnNumber++);
 					severityCell.setCellValue(issue.getSeverity());
-
-					if ("CRITICAL".equalsIgnoreCase(issue.getSeverity()) || "MAJOR".equalsIgnoreCase(issue.getSeverity())) {
-						setBGColor(workbook, severityCellStyle, new Color(255, 199, 206), FillPatternType.SOLID_FOREGROUND);
-						severityCell.setCellStyle(severityCellStyle);
-					} else {
-						severityCell.setCellStyle(generalCellStyleCenter);
-					}
+					severityCell.setCellStyle(generalCellStyleCenter);
 
 					Cell cellComponent = reportRow.createCell(reportColumnNumber++);
 					cellComponent.setCellValue(issue.getComponent());
@@ -303,7 +298,8 @@ class ExcelService {
 
 				}
 
-				reportSheet.setAutoFilter(new CellRangeAddress(firstCell.getRowIndex(), lastCell.getRowIndex(), firstCell.getColumnIndex(), lastCell.getColumnIndex()));
+				reportSheet.setAutoFilter(
+						new CellRangeAddress(firstCell.getRowIndex(), lastCell.getRowIndex(), firstCell.getColumnIndex(), lastCell.getColumnIndex()));
 				reportSheet.createFreezePane(0, 1);
 
 				for (int i = 0; i < reportColumns.length; i++) {
@@ -318,34 +314,35 @@ class ExcelService {
 					}
 				}
 
-				file = new File(Constants.getFileName(projectName) + "_" + version + ".xlsx");
+				file = new File(Constants.getFileName(projectName) + ".xlsx");
 				fileOut = new FileOutputStream(file);
 				workbook.write(fileOut);
-				fileCreated = true;
+				logger.debug("Excel Generated : {}", file.getName());
+				return file.getName();
 			} else {
-				log.info("No Data Found");
+				logger.warn("No Data Found");
 			}
 		} catch (Exception ex) {
-			log.error("exportExcel : ", ex);
+			logger.error("exportExcel : ", ex);
+			ex.printStackTrace();
 		} finally {
 			if (fileOut != null)
 				fileOut.close();
 			if (workbook != null)
 				workbook.close();
 
-			if (fileCreated && file != null)
-				Desktop.getDesktop().open(file);
 		}
+		return "";
 	}
 
-	private void setFont(Font font, CellStyle cellStyle, boolean isBold, int height, short color) {
+	private static void setFont(Font font, CellStyle cellStyle, boolean isBold, int height, short color) {
 		font.setBold(isBold);
 		font.setFontHeightInPoints((short) height);
 		font.setColor(color);
 		cellStyle.setFont(font);
 	}
 
-	private void setBGColor(Workbook workbook, CellStyle cellStyle, Color color, FillPatternType fp) {
+	private static void setBGColor(Workbook workbook, CellStyle cellStyle, Color color, FillPatternType fp) {
 		byte[] rgb = new byte[] { (byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue() };
 		if (cellStyle instanceof XSSFCellStyle) {
 			XSSFCellStyle xssfreportHeaderCellStyle = (XSSFCellStyle) cellStyle;
@@ -360,7 +357,7 @@ class ExcelService {
 
 	}
 
-	private void setBorder(CellStyle cellStyle, BorderStyle left, BorderStyle top, BorderStyle right, BorderStyle bottom) {
+	private static void setBorder(CellStyle cellStyle, BorderStyle left, BorderStyle top, BorderStyle right, BorderStyle bottom) {
 		cellStyle.setBorderLeft(left);
 		cellStyle.setBorderTop(top);
 		cellStyle.setBorderRight(right);

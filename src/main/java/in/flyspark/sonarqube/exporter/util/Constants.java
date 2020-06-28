@@ -9,7 +9,7 @@ public class Constants {
 	public static final String REPORT_SHEET = "Report";
 
 	public static final String getFileName(String projectName) {
-		SimpleDateFormat fileNameDate = new SimpleDateFormat("dd_MMM_yyyy_HH_mm");
+		SimpleDateFormat fileNameDate = new SimpleDateFormat("dd_MMM_yyyy_HH_mm_ss");
 		return projectName + "_SonarQubeReport_" + fileNameDate.format(new Date());
 	}
 
