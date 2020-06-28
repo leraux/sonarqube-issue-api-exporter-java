@@ -16,15 +16,15 @@ public class Exporter {
 
 		try {
 			if (args.length < 4) {
-				logger.info("\nInput Sequence : Host SonarToken ProjectKey ProjectName");
+				logger.info("\nInput Sequence : SonarQubeURL SonarToken ProjectKey ProjectName");
 				return;
 			}
 
-			String host = args[0];
+			String sonarQubeURL = args[0];
 			String loginToken = args[1];
 			String projectKey = args[2];
 			String projectName = args[3];
-			List<Issues> issues = ReportService.report(host, loginToken, projectKey, projectName);
+			List<Issues> issues = ReportService.report(sonarQubeURL, loginToken, projectKey, projectName);
 			String fileName = ExcelService.exportExcel(issues, projectName);
 			logger.debug("Generated File - {}", fileName);
 		} catch (Exception ex) {

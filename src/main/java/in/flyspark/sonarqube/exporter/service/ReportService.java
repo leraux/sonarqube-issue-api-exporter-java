@@ -14,10 +14,10 @@ public class ReportService {
 
 	private static final int PAGE_SIZE = 500;
 
-	public static List<Issues> report(final String host, final String loginToken, final String projectKey, final String projectName)
+	public static List<Issues> report(final String sonarQubeURL, final String loginToken, final String projectKey, final String projectName)
 			throws ServiceUnavailableException {
 		List<Issues> issues = new ArrayList<Issues>();
-		Issues.Resp respObject = fetchIssues(host, projectKey, loginToken, 1);
+		Issues.Resp respObject = fetchIssues(sonarQubeURL, projectKey, loginToken, 1);
 		if (respObject != null) {
 			if (respObject.issues != null) {
 				issues.addAll(respObject.issues);
@@ -25,7 +25,7 @@ public class ReportService {
 				if (total > PAGE_SIZE) {
 					int max = total / PAGE_SIZE + 2;
 					for (int i = 2; i < max; ++i) {
-						respObject = fetchIssues(host, projectKey, loginToken, i);
+						respObject = fetchIssues(sonarQubeURL, projectKey, loginToken, i);
 						if (respObject != null) {
 							issues.addAll(respObject.issues);
 						}
@@ -36,13 +36,13 @@ public class ReportService {
 		return issues;
 	}
 
-	private static Issues.Resp fetchIssues(final String host, final String projectKey, final String loginToken, final int page)
+	private static Issues.Resp fetchIssues(final String sonarQubeURL, final String projectKey, final String loginToken, final int page)
 			throws ServiceUnavailableException {
-		String url = getURL(host, projectKey, loginToken, page);
+		String url = getURL(sonarQubeURL, projectKey, loginToken, page);
 		return JSON.parseObject(WSEndpoints.getIssue(url), Issues.Resp.class);
 	}
 
-	private static String getURL(final String host, final String projectKey, final String loginToken, final int page) {
-		return Utils.makeValidURL(host + "/api/issues/search?projects=" + projectKey + "&statuses=OPEN&pageSize=-1&pageIndex=" + page);
+	private static String getURL(final String sonarQubeURL, final String projectKey, final String loginToken, final int page) {
+		return Utils.makeValidURL(sonarQubeURL + "/api/issues/search?projects=" + projectKey + "&statuses=OPEN&pageSize=-1&pageIndex=" + page);
 	}
 }
