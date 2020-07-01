@@ -16,6 +16,7 @@ Command line tool for exporting results of SonarQube Analysis into excel
 
 - Extract project  
 - Open command-prompt/terminal and mount root of project 
+- Clean & package the application: mvn clean install
 - Run following maven command as described below :  
     - Command Format:  
       - mvn exec:java -Dexec.mainClass="in.flyspark.sonarqube.exporter.Exporter" -Dexec.args="*SonarQubeURL* *SonarToken* *ProjectKey* *ProjectName*"    
