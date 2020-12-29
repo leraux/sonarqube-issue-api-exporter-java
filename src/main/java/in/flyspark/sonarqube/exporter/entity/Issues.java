@@ -175,12 +175,8 @@ public class Issues {
 
 	@Override
 	public String toString() {
-		return "ClassPojo [severity = " + severity + ", updateDate = " + updateDate + ", line = " + line + ", author = "
-				+ author + ", rule = " + rule + ", project = " + project + ", effort = " + effort + ", message = "
-				+ message + ", creationDate = " + creationDate + ", type = " + type + ", tags = " + tags
-				+ ", component = " + component + ", organization = " + organization
-				+ ", debt = " + debt + ", key = " + key + ", hash = " + hash
-				+ ", status = " + status + "]";
+		return "Issues [severity = " + severity + ", updateDate = " + updateDate + ", line = " + line + ", author = " + author + ", rule = " + rule + ", project = " + project + ", effort = " + effort + ", message = " + message + ", creationDate = " + creationDate + ", type = " + type + ", tags = " + tags + ", component = " + component + ", organization = " + organization + ", debt = " + debt
+				+ ", key = " + key + ", hash = " + hash + ", status = " + status + "]";
 	}
 
 	public static class Resp {

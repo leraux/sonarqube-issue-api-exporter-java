@@ -1,8 +1,12 @@
 package in.flyspark.sonarqube.exporter.util;
 
 public class Utils {
-	public static boolean isNullEmpty(String obj) {
-		return obj == null || obj.trim().length() == 0;
+
+	private Utils() {
+	}
+
+	public static boolean isBlank(String input) {
+		return input == null || input.trim().isEmpty();
 	}
 
 	public static String makeValidURL(String url) {
