@@ -7,8 +7,9 @@ Command line tool for exporting results of SonarQube Analysis into excel
 - Apache Maven to run project from command-prompt/terminal
 
 ### Tested on
-- sonarqube-6.7.6 Community Edition
-- sonar-scanner-3.3.0.1492
+- jdk-11.0.8
+- sonarqube-8.5.1.38104 Community Edition
+- sonar-scanner-4.4.0.2170
  
 ## How to use  
 
