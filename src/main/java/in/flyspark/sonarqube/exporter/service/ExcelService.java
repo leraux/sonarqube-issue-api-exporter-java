@@ -32,22 +32,12 @@ import org.slf4j.LoggerFactory;
 import in.flyspark.sonarqube.exporter.entity.Issues;
 import in.flyspark.sonarqube.exporter.entity.Report;
 import in.flyspark.sonarqube.exporter.util.AppUtils;
-import in.flyspark.sonarqube.exporter.util.Utils;
 
 public class ExcelService {
 	private static final Logger logger = LoggerFactory.getLogger(ExcelService.class.getSimpleName());
 
 	private ExcelService() {
 	}
-
-	private static final String REPORT_EXPORTED_ON = "Report Exported On";
-	private static final String ISSUE_TYPE = "Issue Type";
-	private static final String ISSUE_SEVERITY = "Issue Severity";
-	private static final String MESSAGE = "Message";
-	private static final String LINE = "Line";
-	private static final String COMPONENT = "Component";
-	private static final String SR_NO = "#";
-	private static final String COUNT = "Count";
 
 	public static boolean exportExcel(Report report) throws IOException {
 		logger.debug("Exporting Excel");
@@ -120,6 +110,7 @@ public class ExcelService {
 			setBGColor(workbook, summaryHeadaerStyle, new Color(0, 32, 96), FillPatternType.SOLID_FOREGROUND);
 
 			// Summary Sheet
+			logger.debug("Summary Sheet");
 
 			int firstRow = 1;
 
@@ -133,7 +124,7 @@ public class ExcelService {
 
 			Row exportedDateRow = summarySheet.createRow(summarySheet.getLastRowNum() + 2);
 			Cell exportedDateCell = exportedDateRow.createCell(1);
-			exportedDateCell.setCellValue(REPORT_EXPORTED_ON);
+			exportedDateCell.setCellValue("Report Exported On");
 			exportedDateCell.setCellStyle(boldStyle);
 
 			exportedDateCell = exportedDateRow.createCell(2);
@@ -141,10 +132,11 @@ public class ExcelService {
 			exportedDateCell.setCellStyle(boldStyle);
 
 			// Issue Severities Summary
+			logger.debug("Issue Severities Summary");
 
 			// Issue Severity Header
 			String[] severityColumns = null;
-			severityColumns = new String[] { ISSUE_SEVERITY, COUNT };
+			severityColumns = new String[] { "Issue Severity", "Count" };
 
 			Row severityHeaderRow = summarySheet.createRow(summarySheet.getLastRowNum() + 2);
 			for (int i = 0; i < severityColumns.length; i++) {
@@ -181,10 +173,11 @@ public class ExcelService {
 			summarySheet.getRow(severityRowNumber).getCell(2).setCellStyle(categoryStyle);
 
 			// Issues Types Summary
+			logger.debug("Issues Types Summary");
 
 			// Issue Type Header
 			String[] typeColumns = null;
-			typeColumns = new String[] { ISSUE_TYPE, COUNT };
+			typeColumns = new String[] { "Issue Type", "Count" };
 
 			Row typeHeaderRow = summarySheet.createRow(summarySheet.getLastRowNum() + 2);
 			for (int i = 0; i < typeColumns.length; i++) {
@@ -225,12 +218,14 @@ public class ExcelService {
 			 * Issue Details Sheet
 			 */
 
+			logger.debug("Issue Details Sheet");
+
 			if (!report.getIssueDetails().isEmpty()) {
 				Sheet issueDetailsSheet = workbook.createSheet(AppUtils.REPORT);
 
 				Row reportHeaderRow = issueDetailsSheet.createRow(0);
 
-				String[] reportColumns = { SR_NO, ISSUE_TYPE, ISSUE_SEVERITY, COMPONENT, LINE, MESSAGE };
+				String[] reportColumns = { "#", "Issue Type", "Issue Severity", "Component", "Line", "Message" };
 				for (int i = 0; i < reportColumns.length; i++) {
 					Cell cell = reportHeaderRow.createCell(i);
 					cell.setCellValue(reportColumns[i]);
@@ -272,7 +267,7 @@ public class ExcelService {
 					cellComponent.setCellStyle(commonStyle);
 
 					Cell cellLine = reportRow.createCell(reportColumnNumber++);
-					cellLine.setCellValue(Utils.isBlank(issue.getLine()) ? 0 : Integer.parseInt(issue.getLine()));
+					cellLine.setCellValue(AppUtils.isBlank(issue.getLine()) ? 0 : Integer.parseInt(issue.getLine()));
 					cellLine.setCellStyle(centeredStyle);
 
 					Cell cellMessage = reportRow.createCell(reportColumnNumber++);
@@ -296,6 +291,8 @@ public class ExcelService {
 						issueDetailsSheet.setColumnWidth(i, 6000);
 					}
 				}
+			} else {
+				logger.debug("Issue list is empty");
 			}
 
 			workbook.write(fileOut);

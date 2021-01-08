@@ -11,7 +11,6 @@ import in.flyspark.sonarqube.exporter.rest.RestParser;
 import in.flyspark.sonarqube.exporter.service.ExcelService;
 import in.flyspark.sonarqube.exporter.service.ReportFilterService;
 import in.flyspark.sonarqube.exporter.util.AppUtils;
-import in.flyspark.sonarqube.exporter.util.DateTimeUtil;
 
 public class Exporter {
 	private static final Logger logger = LoggerFactory.getLogger(Exporter.class.getSimpleName());
@@ -29,7 +28,7 @@ public class Exporter {
 			String projectKey = args[2];
 			String projectName = args[3];
 
-			String fileNameTimestamp = DateTimeUtil.getCurrentDateTime(AppUtils.FILE_FORMAT);
+			String fileNameTimestamp = AppUtils.getCurrentDateTime(AppUtils.FILE_FORMAT);
 			String fileName = AppUtils.getFileName(projectName, fileNameTimestamp);
 
 			List<Issues> issues = RestParser.createIssueList(sonarQubeURL, token, projectKey);
@@ -37,7 +36,7 @@ public class Exporter {
 			Report report = new Report();
 			report.setProjectKey(projectKey);
 			report.setProjectName(projectName);
-			report.setExportedTimestamp(DateTimeUtil.getCurrentDateTime(AppUtils.REPORT_DATE_FORMAT));
+			report.setExportedTimestamp(AppUtils.getCurrentDateTime(AppUtils.REPORT_DATE_FORMAT));
 			report.setFileName(fileName);
 			report.setSeverity(ReportFilterService.getSeverity());
 			report.setType(ReportFilterService.getType());

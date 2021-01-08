@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSON;
 
 import in.flyspark.sonarqube.exporter.entity.Issues;
 import in.flyspark.sonarqube.exporter.exception.ServiceUnavailableException;
-import in.flyspark.sonarqube.exporter.util.Utils;
+import in.flyspark.sonarqube.exporter.util.AppUtils;
 
 public class RestParser {
 	private static final Logger logger = LoggerFactory.getLogger(RestParser.class.getSimpleName());
@@ -53,6 +53,6 @@ public class RestParser {
 
 	// token is unused and kept for future purpose
 	private static String makeURL(final String sonarQubeURL, final String projectKey, final String token, final int page) {
-		return Utils.makeValidURL(sonarQubeURL + "/api/issues/search?projects=" + projectKey + "&statuses=OPEN&pageSize=-1&pageIndex=" + page);
+		return AppUtils.makeValidURL(sonarQubeURL + "/api/issues/search?projects=" + projectKey + "&statuses=OPEN&pageSize=-1&pageIndex=" + page);
 	}
 }

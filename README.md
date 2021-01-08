@@ -1,4 +1,4 @@
-# SonarQubeExporter  
+# sonar-qube-exporter  
 ###### v1.1.0.0  
 Command line tool for exporting results of SonarQube Analysis into excel
 
