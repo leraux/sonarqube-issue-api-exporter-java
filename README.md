@@ -1,35 +1,25 @@
-# sonar-qube-exporter  
-###### v1.1.0.0  
-Command line tool for exporting results of SonarQube Analysis into excel
+# SonarQube Issue API Exporter In Angular
 
-### Pre-requisite
-- Before running the tool make sure that SonarQube is running 
-- Apache Maven to run project from command-prompt/terminal
+Angular based web portal to export data of SonarQube Issue API for public projects. 
 
-### Tested on
-- jdk-11.0.8
-- sonarqube-8.5.1.38104 Community Edition
-- sonar-scanner-4.4.0.2170
- 
-## How to use  
+## How to use
 
-### 1) Export excel using source code
+Due to CORS, this project won't work on any browser. Follow below steps to disable CORS in a Google's Chrome Web Browser as well as export the report.
 
-- Extract project  
-- Open command-prompt/terminal and mount root of project 
-- Clean & package the application: mvn clean install
-- Run following maven command as described below :  
-    - Command Format:  
-      - mvn exec:java -Dexec.mainClass="in.flyspark.sonarqube.exporter.Exporter" -Dexec.args="*SonarQubeURL* *SonarToken* *ProjectKey* *ProjectName*"    
-    
-    - Command Example:  
-      - mvn exec:java -Dexec.mainClass="in.flyspark.sonarqube.exporter.Exporter" -Dexec.args="http://localhost:9000/ da5ad9e667faf116e42a8aadfb33d0b64f45bd99 EmployeeTracking EmployeeTracking_Demo_Code" 
-   
-- On success, check root directory of project for generated excel file.
+- Right click on Chrome Launcher and open properties
+- Under `Shortcut` tab find `Target`
+- Append following property inside `Target`
+    - --disable-web-security --user-data-dir="C:/ChromeDevSession"
+- Finally, it will look like below:
+    - "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir="C:/ChromeDevSession"
+- Press `Ok` and launch Chrome 
+- Open `http://localhost:4200/` and feed SonarQube project details
+- Click on export to generate the excel report
 
-### 2) Export excel using executable jar
 
-- Executable jar is available inside release directory
-  - java -jar executable.jar SonarQubeURL SonarToken ProjectKey ProjectName
-  - java -jar SonarQubeExporter.jar http://localhost:9000/ da5ad9e667faf116e42a8aadfb33d0b64f45bd99 EmployeeTracking EmployeeTracking_Demo_Code
+## Angular Version
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.7.
 
+## Development server
+
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
