@@ -32,3 +32,9 @@ Command line tool for exporting results of SonarQube Analysis into excel
 - Executable jar is available inside release directory
   - java -jar executable.jar SonarQubeURL SonarToken ProjectKey ProjectName
   - java -jar SonarQubeExporter.jar http://localhost:9000/ da5ad9e667faf116e42a8aadfb33d0b64f45bd99 EmployeeTracking EmployeeTracking_Demo_Code
+
+
+## Credits:
+
+I want to thank [ThinkingStudio](https://github.com/ThinkingStudio) for SonarQube's REST API parsing logic
+
