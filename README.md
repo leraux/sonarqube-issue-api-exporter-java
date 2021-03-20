@@ -8,3 +8,7 @@ mvn spring-boot:run
 ```
 
 Open browser and hit `http://127.0.0.1:8080/` to feed the required details and click on `Export` button
+
+## Credits:
+
+I want to thank [ThinkingStudio](https://github.com/ThinkingStudio) for reference project
