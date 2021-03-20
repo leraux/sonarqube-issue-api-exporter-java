@@ -7,4 +7,4 @@ A Spring Boot application to export SonarQube's issue API
 mvn spring-boot:run
 ```
 
-Open browser at `http://127.0.0.1:8080/` to view the home page and click on `Export` button
+Open browser and hit `http://127.0.0.1:8080/` to feed the required details and click on `Export` button
