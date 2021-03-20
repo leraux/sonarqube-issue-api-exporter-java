@@ -3,8 +3,6 @@ A Spring Boot application to export SonarQube's issue API
 
 ## How to run
 
-Start the application in dev mode
-
 ```
 mvn spring-boot:run
 ```
