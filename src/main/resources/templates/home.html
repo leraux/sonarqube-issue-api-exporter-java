@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>SonarQube Issue API Exporter</title>
+<link th:href="@{/style.css}" rel="stylesheet" />
+</head>
+<body>
+	<div>
+		<h1>SonarQube Issue API Exporter</h1>
+		<form action="#" th:action="@{/}" method="post" th:object="${sonar}">
+			
+			<label>SonarQube URL</label> 
+			<input type="text" th:field="*{sonarQubeURL}" placeholder="http://127.0.0.1:9000/" required="required" />
+			<br /> 
+			<br /> 
+			
+			<label>Token</label> 
+			<input type="text" th:field="*{token}" placeholder="a49e3bae818987aaba02f434f6d008454a4c9610" required="required"  />
+			<br /> 
+			<br /> 
+			
+			<label>Project Key</label> 
+			<input type="text" th:field="*{projectKey}" placeholder="test-app" required="required"  />
+			<br /> 
+			<br /> 
+			
+			<label>Project Name</label> 
+			<input type="text" th:field="*{projectName}" placeholder="test-app" required="required"  />
+			<br /> 
+			<br />
+
+			<button type="submit">Export</button>
+		</form>
+	</div>
+</body>
+</html>

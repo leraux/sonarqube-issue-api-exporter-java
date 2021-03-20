@@ -1,8 +1,7 @@
 package in.flyspark.sonarqube.exporter.service;
 
 import java.awt.Color;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,23 +27,20 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import in.flyspark.sonarqube.exporter.entity.Issues;
 import in.flyspark.sonarqube.exporter.entity.Report;
 import in.flyspark.sonarqube.exporter.util.AppUtils;
 
+@Service
 public class ExcelService {
 	private static final Logger logger = LoggerFactory.getLogger(ExcelService.class.getSimpleName());
 
-	private ExcelService() {
-	}
+	public byte[] exportExcel(Report report) throws IOException {
+		logger.debug("Generating Excel");
 
-	public static boolean exportExcel(Report report) throws IOException {
-		logger.debug("Exporting Excel");
-
-		File file = new File(report.getFileName() + ".xlsx");
-
-		try (Workbook workbook = new XSSFWorkbook(); FileOutputStream fileOut = new FileOutputStream(file);) {
+		try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream baos = new ByteArrayOutputStream();) {
 
 			CellStyle commonStyle = workbook.createCellStyle();
 			commonStyle.setAlignment(HorizontalAlignment.LEFT);
@@ -52,7 +48,7 @@ public class ExcelService {
 			commonStyle.setWrapText(true);
 			setFont(workbook.createFont(), commonStyle, false, 11, IndexedColors.BLACK.getIndex());
 			setBorder(commonStyle, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN);
-			setBGColor(workbook, commonStyle, new Color(255, 255, 255), FillPatternType.SOLID_FOREGROUND);
+			setBackground(workbook, commonStyle, new Color(255, 255, 255), FillPatternType.SOLID_FOREGROUND);
 
 			CellStyle centeredStyle = workbook.createCellStyle();
 			centeredStyle.setAlignment(HorizontalAlignment.CENTER);
@@ -60,14 +56,14 @@ public class ExcelService {
 			centeredStyle.setWrapText(true);
 			setFont(workbook.createFont(), centeredStyle, false, 11, IndexedColors.BLACK.getIndex());
 			setBorder(centeredStyle, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN);
-			setBGColor(workbook, centeredStyle, new Color(255, 255, 255), FillPatternType.SOLID_FOREGROUND);
+			setBackground(workbook, centeredStyle, new Color(255, 255, 255), FillPatternType.SOLID_FOREGROUND);
 
 			CellStyle boldStyle = workbook.createCellStyle();
 			boldStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 			boldStyle.setWrapText(true);
 			setFont(workbook.createFont(), boldStyle, true, 11, IndexedColors.BLACK.getIndex());
 			setBorder(boldStyle, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN);
-			setBGColor(workbook, boldStyle, new Color(255, 255, 255), FillPatternType.SOLID_FOREGROUND);
+			setBackground(workbook, boldStyle, new Color(255, 255, 255), FillPatternType.SOLID_FOREGROUND);
 
 			CellStyle severityCellStyle = workbook.createCellStyle();
 			severityCellStyle.setWrapText(true);
@@ -89,13 +85,13 @@ public class ExcelService {
 			categoryStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 			setBorder(categoryStyle, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN);
 			setFont(workbook.createFont(), categoryStyle, true, 12, IndexedColors.WHITE.getIndex());
-			setBGColor(workbook, categoryStyle, new Color(32, 55, 100), FillPatternType.SOLID_FOREGROUND);
+			setBackground(workbook, categoryStyle, new Color(32, 55, 100), FillPatternType.SOLID_FOREGROUND);
 
 			CellStyle reportHeaderStyle = workbook.createCellStyle();
 			reportHeaderStyle.setWrapText(true);
 			setFont(workbook.createFont(), reportHeaderStyle, true, 12, IndexedColors.WHITE.getIndex());
 			setBorder(reportHeaderStyle, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN);
-			setBGColor(workbook, reportHeaderStyle, new Color(32, 55, 100), FillPatternType.SOLID_FOREGROUND);
+			setBackground(workbook, reportHeaderStyle, new Color(32, 55, 100), FillPatternType.SOLID_FOREGROUND);
 			reportHeaderStyle.setAlignment(HorizontalAlignment.CENTER);
 
 			Cell firstCell = null;
@@ -107,22 +103,22 @@ public class ExcelService {
 			summaryHeadaerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 			setBorder(summaryHeadaerStyle, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN, BorderStyle.THIN);
 			setFont(workbook.createFont(), summaryHeadaerStyle, true, 12, IndexedColors.WHITE.getIndex());
-			setBGColor(workbook, summaryHeadaerStyle, new Color(0, 32, 96), FillPatternType.SOLID_FOREGROUND);
+			setBackground(workbook, summaryHeadaerStyle, new Color(0, 32, 96), FillPatternType.SOLID_FOREGROUND);
 
 			// Summary Sheet
 			logger.debug("Summary Sheet");
 
 			int firstRow = 1;
 
-			Sheet summarySheet = workbook.createSheet(AppUtils.SUMMARY);
-			Row summaryHeaderRow = summarySheet.createRow((short) firstRow);
+			Sheet projectSummarySheet = workbook.createSheet("Project Summary");
+			Row summaryHeaderRow = projectSummarySheet.createRow((short) firstRow);
 
-			summarySheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow, 1, 2));
+			projectSummarySheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow, 1, 2));
 			Cell summaryHeaderCell = summaryHeaderRow.createCell(1);
 			summaryHeaderCell.setCellValue(report.getProjectName());
 			summaryHeaderCell.setCellStyle(summaryHeadaerStyle);
 
-			Row exportedDateRow = summarySheet.createRow(summarySheet.getLastRowNum() + 2);
+			Row exportedDateRow = projectSummarySheet.createRow(projectSummarySheet.getLastRowNum() + 2);
 			Cell exportedDateCell = exportedDateRow.createCell(1);
 			exportedDateCell.setCellValue("Report Exported On");
 			exportedDateCell.setCellStyle(boldStyle);
@@ -138,7 +134,7 @@ public class ExcelService {
 			String[] severityColumns = null;
 			severityColumns = new String[] { "Issue Severity", "Count" };
 
-			Row severityHeaderRow = summarySheet.createRow(summarySheet.getLastRowNum() + 2);
+			Row severityHeaderRow = projectSummarySheet.createRow(projectSummarySheet.getLastRowNum() + 2);
 			for (int i = 0; i < severityColumns.length; i++) {
 				Cell cell = severityHeaderRow.createCell(i + 1);
 				cell.setCellValue(severityColumns[i]);
@@ -152,10 +148,10 @@ public class ExcelService {
 
 			// Issue Severity Body
 			Map<String, Long> issueSeverities = new LinkedHashMap<>(report.getSeverity());
-			int severityRowNumber = summarySheet.getLastRowNum() + 1; // i.e. 13
+			int severityRowNumber = projectSummarySheet.getLastRowNum() + 1; // i.e. 13
 			for (Map.Entry<String, Long> entry : issueSeverities.entrySet()) {
 				int severityColumnIndex = 1;
-				Row severityRow = summarySheet.createRow(severityRowNumber++);
+				Row severityRow = projectSummarySheet.createRow(severityRowNumber++);
 
 				Cell cellKey = severityRow.createCell(severityColumnIndex++);
 				cellKey.setCellValue(entry.getKey());
@@ -169,8 +165,8 @@ public class ExcelService {
 
 			// Issue Severity Footer
 			--severityRowNumber;
-			summarySheet.getRow(severityRowNumber).getCell(1).setCellStyle(categoryStyle);
-			summarySheet.getRow(severityRowNumber).getCell(2).setCellStyle(categoryStyle);
+			projectSummarySheet.getRow(severityRowNumber).getCell(1).setCellStyle(categoryStyle);
+			projectSummarySheet.getRow(severityRowNumber).getCell(2).setCellStyle(categoryStyle);
 
 			// Issues Types Summary
 			logger.debug("Issues Types Summary");
@@ -179,7 +175,7 @@ public class ExcelService {
 			String[] typeColumns = null;
 			typeColumns = new String[] { "Issue Type", "Count" };
 
-			Row typeHeaderRow = summarySheet.createRow(summarySheet.getLastRowNum() + 2);
+			Row typeHeaderRow = projectSummarySheet.createRow(projectSummarySheet.getLastRowNum() + 2);
 			for (int i = 0; i < typeColumns.length; i++) {
 				Cell cell = typeHeaderRow.createCell(i + 1);
 				cell.setCellValue(typeColumns[i]);
@@ -188,10 +184,10 @@ public class ExcelService {
 
 			// Issue Type Body
 			Map<String, Long> issyeTypes = new LinkedHashMap<>(report.getType());
-			int typeRowNumber = summarySheet.getLastRowNum() + 1;
+			int typeRowNumber = projectSummarySheet.getLastRowNum() + 1;
 			for (Map.Entry<String, Long> entry : issyeTypes.entrySet()) {
 				int typeColumnIndex = 1;
-				Row typeRow = summarySheet.createRow(typeRowNumber++);
+				Row typeRow = projectSummarySheet.createRow(typeRowNumber++);
 
 				Cell cellKey = typeRow.createCell(typeColumnIndex++);
 				cellKey.setCellValue(entry.getKey());
@@ -205,13 +201,11 @@ public class ExcelService {
 
 			// Issue Type Footer
 			--typeRowNumber;
-			summarySheet.getRow(typeRowNumber).getCell(1).setCellStyle(categoryStyle);
-			summarySheet.getRow(typeRowNumber).getCell(2).setCellStyle(categoryStyle);
+			projectSummarySheet.getRow(typeRowNumber).getCell(1).setCellStyle(categoryStyle);
+			projectSummarySheet.getRow(typeRowNumber).getCell(2).setCellStyle(categoryStyle);
 
-			// Auto Resize Columns
-			// 10 is random number
 			for (int i = 1; i < 10; i++) {
-				summarySheet.autoSizeColumn(i);
+				projectSummarySheet.autoSizeColumn(i);
 			}
 
 			/**
@@ -221,7 +215,7 @@ public class ExcelService {
 			logger.debug("Issue Details Sheet");
 
 			if (!report.getIssueDetails().isEmpty()) {
-				Sheet issueDetailsSheet = workbook.createSheet(AppUtils.REPORT);
+				Sheet issueDetailsSheet = workbook.createSheet("Issue Details");
 
 				Row reportHeaderRow = issueDetailsSheet.createRow(0);
 
@@ -295,22 +289,25 @@ public class ExcelService {
 				logger.debug("Issue list is empty");
 			}
 
-			workbook.write(fileOut);
-			return true;
+			workbook.write(baos);
+
+			logger.debug("Excel Generated");
+
+			return baos.toByteArray();
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 		}
-		return false;
+		return null;
 	}
 
-	private static void setFont(Font font, CellStyle cellStyle, boolean isBold, int height, short color) {
+	private void setFont(Font font, CellStyle cellStyle, boolean isBold, int height, short color) {
 		font.setBold(isBold);
 		font.setFontHeightInPoints((short) height);
 		font.setColor(color);
 		cellStyle.setFont(font);
 	}
 
-	private static void setBGColor(Workbook workbook, CellStyle cellStyle, Color color, FillPatternType fp) {
+	private void setBackground(Workbook workbook, CellStyle cellStyle, Color color, FillPatternType fp) {
 		byte[] rgb = new byte[] { (byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue() };
 		if (cellStyle instanceof XSSFCellStyle) {
 			XSSFCellStyle xssfreportHeaderCellStyle = (XSSFCellStyle) cellStyle;
@@ -325,7 +322,7 @@ public class ExcelService {
 
 	}
 
-	private static void setBorder(CellStyle cellStyle, BorderStyle left, BorderStyle top, BorderStyle right, BorderStyle bottom) {
+	private void setBorder(CellStyle cellStyle, BorderStyle left, BorderStyle top, BorderStyle right, BorderStyle bottom) {
 		cellStyle.setBorderLeft(left);
 		cellStyle.setBorderTop(top);
 		cellStyle.setBorderRight(right);
